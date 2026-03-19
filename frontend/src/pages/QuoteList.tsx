@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusCircle, Search } from 'lucide-react';
 import api from '../lib/api';
-import { Quote, QuoteStatus } from '../types';
+import type { Quote, QuoteStatus } from '../types';
 import { formatUSD, STATUS_LABELS, STATUS_COLORS, BUSINESS_LINE_LABELS } from '../lib/utils';
 
 export default function QuoteList() {

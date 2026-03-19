@@ -3,7 +3,7 @@ import { Link, useLocation, Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, FileText, Users, Settings, UserCog, FolderOpen,
-  LogOut, Menu, X, ChevronDown
+  LogOut, Menu, ChevronDown
 } from 'lucide-react';
 
 export default function Layout() {

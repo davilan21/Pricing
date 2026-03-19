@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Printer } from 'lucide-react';
 import api from '../lib/api';
-import { Quote, QuoteStatus } from '../types';
+import type { Quote, QuoteStatus } from '../types';
 import {
   formatCOP, formatUSD, formatPercent,
   STATUS_LABELS, STATUS_COLORS,

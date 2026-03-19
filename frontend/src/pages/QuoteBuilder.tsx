@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Save, Plus, Trash2, Layers, Check } from 'lucide-react';
 import api from '../lib/api';
-import {
+import type {
   RoleCatalog, Client, TeamTemplate, CommissionStructure, Parameter,
   ContractType, LeadSource, BusinessLine, CalculationResult
 } from '../types';
@@ -44,7 +44,6 @@ export default function QuoteBuilder() {
   const [clients, setClients] = useState<Client[]>([]);
   const [templates, setTemplates] = useState<TeamTemplate[]>([]);
   const [commissions, setCommissions] = useState<CommissionStructure[]>([]);
-  const [params, setParams] = useState<Record<string, string>>({});
   const [showTemplates, setShowTemplates] = useState(false);
   const [showNewClient, setShowNewClient] = useState(false);
   const [newClient, setNewClient] = useState({ name: '', company: '', email: '', phone: '' });
@@ -80,7 +79,6 @@ export default function QuoteBuilder() {
       setCommissions(paramsRes.data.commissions);
       const p: Record<string, string> = {};
       paramsRes.data.parameters.forEach((param: Parameter) => { p[param.key] = param.value; });
-      setParams(p);
       // Set default margins from params
       setConfig(prev => ({
         ...prev,

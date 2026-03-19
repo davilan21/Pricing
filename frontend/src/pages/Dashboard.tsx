@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Users, TrendingUp, PlusCircle } from 'lucide-react';
 import api from '../lib/api';
-import { DashboardData } from '../types';
+import type { DashboardData } from '../types';
 import { formatUSD, BUSINESS_LINE_LABELS, STATUS_LABELS, STATUS_COLORS } from '../lib/utils';
 
 export default function Dashboard() {

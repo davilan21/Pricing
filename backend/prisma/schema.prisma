@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  COMMERCIAL
+}
+
+enum ContractType {
+  NOMINA
+  PRESTACION_SERVICIOS
+  DEEL_ONTOP
+}
+
+enum LeadSource {
+  MARKETING
+  DIRECTO
+  REFERIDO_IMAGINE
+  NETWORK_COLD_CALLING
+}
+
+enum BusinessLine {
+  EQUIPO_DEDICADO
+  DESCUBRIMIENTO
+  SPRINT_MVP
+  CASO_EXPRESS
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(COMMERCIAL)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clients        Client[]
+  quotes         Quote[]
+  teamTemplates  TeamTemplate[]
+
+  @@map("users")
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  company   String
+  email     String?
+  phone     String?
+  notes     String?
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator User    @relation(fields: [createdBy], references: [id])
+  quotes  Quote[]
+
+  @@map("clients")
+}
+
+model RoleCatalog {
+  id          String   @id @default(uuid())
+  name        String
+  baseSalary  Float
+  companyCost Float
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teamTemplateMembers TeamTemplateMember[]
+  quoteTeamMembers    QuoteTeamMember[]
+
+  @@map("role_catalog")
+}
+
+model Parameter {
+  id       String @id @default(uuid())
+  key      String @unique
+  value    String
+  category String
+
+  @@map("parameters")
+}
+
+model CommissionStructure {
+  id         String     @id @default(uuid())
+  leadSource LeadSource @unique
+  referido   Float
+  kam        Float
+  total      Float
+
+  @@map("commission_structure")
+}
+
+model TeamTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator User                @relation(fields: [createdBy], references: [id])
+  members TeamTemplateMember[]
+
+  @@map("team_templates")
+}
+
+model TeamTemplateMember {
+  id           String       @id @default(uuid())
+  templateId   String
+  roleId       String
+  dedication   Float
+  contractType ContractType @default(PRESTACION_SERVICIOS)
+
+  template TeamTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  role     RoleCatalog  @relation(fields: [roleId], references: [id])
+
+  @@map("team_template_members")
+}
+
+model Quote {
+  id                 String       @id @default(uuid())
+  code               String       @unique
+  clientId           String
+  createdBy          String
+  businessLine       BusinessLine
+  durationMonths     Float
+  sellerContractType ContractType
+  leadSource         LeadSource
+  commissionRate     Float
+  creditCardPayment  Boolean      @default(false)
+  factoring          Boolean      @default(false)
+  staffAugmentation  Boolean      @default(false)
+  targetGrossMargin  Float
+  targetNetMargin    Float?
+  trmRate            Float
+  status             QuoteStatus  @default(DRAFT)
+
+  icaRate            Float
+  incomeTaxRate      Float
+  ccRate             Float
+  hoursPerMonth      Float        @default(180)
+
+  teamCostMonthly         Float?
+  teamCostTotal           Float?
+  fixedCosts              Float?
+  grossMarginPriceCop     Float?
+  grossMarginPriceUsd     Float?
+  netMarginPriceCop       Float?
+  netMarginPriceUsd       Float?
+  grossMarginHourlyUsd    Float?
+  netMarginHourlyUsd      Float?
+  resultingNetMargin      Float?
+  resultingGrossMargin    Float?
+  commissionAmount        Float?
+  icaAmount               Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client      Client            @relation(fields: [clientId], references: [id])
+  creator     User              @relation(fields: [createdBy], references: [id])
+  teamMembers QuoteTeamMember[]
+
+  @@map("quotes")
+}
+
+model QuoteTeamMember {
+  id              String       @id @default(uuid())
+  quoteId         String
+  roleId          String
+  roleName        String
+  roleSalary      Float
+  roleCompanyCost Float
+  dedication      Float
+  contractType    ContractType
+  costMonthly     Float
+  costTotal       Float
+  hours           Float
+
+  quote Quote       @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  role  RoleCatalog @relation(fields: [roleId], references: [id])
+
+  @@map("quote_team_members")
+}

@@ -28,12 +28,9 @@ export default function AdminParameters() {
 
   const fetchData = () => {
     setLoading(true);
-    Promise.all([
-      api.get('/parameters'),
-      api.get('/parameters/commissions'),
-    ]).then(([paramsRes, commRes]) => {
+    api.get('/parameters').then(({ data }) => {
       const map: Record<string, string> = {};
-      (paramsRes.data as Parameter[]).forEach((p: Parameter) => { map[p.key] = p.value; });
+      (data.parameters as Parameter[]).forEach((p: Parameter) => { map[p.key] = p.value; });
       setParams({
         TRM: map.TRM || '3550',
         ICA_RATE: String(parseFloat(map.ICA_RATE || '0.0069') * 100),
@@ -43,7 +40,7 @@ export default function AdminParameters() {
         GROSS_MARGIN_TARGET: String(parseFloat(map.GROSS_MARGIN_TARGET || '0.4') * 100),
         NET_MARGIN_TARGET: String(parseFloat(map.NET_MARGIN_TARGET || '0.2') * 100),
       });
-      setCommissions(commRes.data);
+      setCommissions(data.commissions);
     }).finally(() => setLoading(false));
   };
 
@@ -55,13 +52,15 @@ export default function AdminParameters() {
     setError(''); setSuccess('');
     try {
       await api.put('/parameters', {
-        TRM: params.TRM,
-        ICA_RATE: String(parseFloat(params.ICA_RATE) / 100),
-        INCOME_TAX_RATE: String(parseFloat(params.INCOME_TAX_RATE) / 100),
-        CC_RATE: String(parseFloat(params.CC_RATE) / 100),
-        HOURS_PER_MONTH: params.HOURS_PER_MONTH,
-        GROSS_MARGIN_TARGET: String(parseFloat(params.GROSS_MARGIN_TARGET) / 100),
-        NET_MARGIN_TARGET: String(parseFloat(params.NET_MARGIN_TARGET) / 100),
+        parameters: [
+          { key: 'TRM', value: params.TRM },
+          { key: 'ICA_RATE', value: String(parseFloat(params.ICA_RATE) / 100) },
+          { key: 'INCOME_TAX_RATE', value: String(parseFloat(params.INCOME_TAX_RATE) / 100) },
+          { key: 'CC_RATE', value: String(parseFloat(params.CC_RATE) / 100) },
+          { key: 'HOURS_PER_MONTH', value: params.HOURS_PER_MONTH },
+          { key: 'GROSS_MARGIN_TARGET', value: String(parseFloat(params.GROSS_MARGIN_TARGET) / 100) },
+          { key: 'NET_MARGIN_TARGET', value: String(parseFloat(params.NET_MARGIN_TARGET) / 100) },
+        ],
       });
       setSuccess('Parámetros guardados correctamente');
       setTimeout(() => setSuccess(''), 3000);
@@ -85,9 +84,11 @@ export default function AdminParameters() {
     setSavingComm(true);
     setError(''); setSuccess('');
     try {
-      await Promise.all(commissions.map(c =>
-        api.put(`/parameters/commissions/${c.id}`, { referido: c.referido, kam: c.kam, total: c.total })
-      ));
+      await api.put('/parameters/commissions', {
+        commissions: commissions.map(c => ({
+          leadSource: c.leadSource, referido: c.referido, kam: c.kam, total: c.total,
+        })),
+      });
       setSuccess('Comisiones guardadas correctamente');
       setTimeout(() => setSuccess(''), 3000);
     } catch {

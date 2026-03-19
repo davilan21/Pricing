@@ -71,7 +71,7 @@ export default function AdminUsers() {
   const toggleActive = async (user: User) => {
     if (user.id === currentUser?.id) return;
     try {
-      await api.patch(`/users/${user.id}`, { isActive: !user.isActive });
+      await api.put(`/users/${user.id}`, { isActive: !user.isActive });
       fetchUsers();
     } catch {
       // ignore

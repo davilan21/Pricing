@@ -24,7 +24,7 @@ export default function AdminRoles() {
 
   const fetchRoles = () => {
     setLoading(true);
-    api.get('/roles?all=true').then(({ data }) => setRoles(data)).finally(() => setLoading(false));
+    api.get('/roles/all').then(({ data }) => setRoles(data)).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchRoles(); }, []);
@@ -71,7 +71,7 @@ export default function AdminRoles() {
 
   const toggleActive = async (role: RoleCatalog) => {
     try {
-      await api.patch(`/roles/${role.id}`, { isActive: !role.isActive });
+      await api.put(`/roles/${role.id}`, { isActive: !role.isActive });
       fetchRoles();
     } catch {
       // ignore

@@ -6,9 +6,9 @@ import { calculateQuote, TeamMemberInput } from '../services/calculationEngine';
 export const quotesRouter = Router();
 quotesRouter.use(authenticate);
 
-async function generateQuoteCode(): Promise<string> {
+async function generateQuoteCode(tx: { quote: typeof prisma.quote }): Promise<string> {
   const year = new Date().getFullYear();
-  const count = await prisma.quote.count({
+  const count = await tx.quote.count({
     where: { code: { startsWith: `QT-${year}` } },
   });
   return `QT-${year}-${String(count + 1).padStart(4, '0')}`;
@@ -119,7 +119,10 @@ quotesRouter.post('/', async (req: AuthRequest, res: Response) => {
     const roleMap = new Map(roles.map((r) => [r.id, r]));
 
     const memberInputs: TeamMemberInput[] = teamMembers.map((m: any) => {
-      const role = roleMap.get(m.roleId)!;
+      const role = roleMap.get(m.roleId);
+      if (!role) {
+        throw new Error(`Role not found: ${m.roleId}`);
+      }
       return {
         roleName: role.name,
         baseSalary: role.baseSalary,
@@ -143,61 +146,63 @@ quotesRouter.post('/', async (req: AuthRequest, res: Response) => {
       hoursPerMonth,
     });
 
-    const code = await generateQuoteCode();
+    const quote = await prisma.$transaction(async (tx) => {
+      const code = await generateQuoteCode(tx);
 
-    const quote = await prisma.quote.create({
-      data: {
-        code,
-        clientId,
-        createdBy: req.user!.id,
-        businessLine,
-        durationMonths,
-        sellerContractType: sellerContractType || 'PRESTACION_SERVICIOS',
-        leadSource: leadSource || 'DIRECTO',
-        commissionRate: commissionRate || 0.1,
-        creditCardPayment: creditCardPayment || false,
-        factoring: factoring || false,
-        staffAugmentation: staffAugmentation || false,
-        targetGrossMargin: targetGrossMargin || 0.5,
-        targetNetMargin: targetNetMargin || 0.2,
-        trmRate: trm,
-        icaRate,
-        incomeTaxRate,
-        ccRate,
-        hoursPerMonth,
-        status: status || 'DRAFT',
-        teamCostMonthly: calc.teamCostMonthly,
-        teamCostTotal: calc.teamCostTotal,
-        fixedCosts: calc.costBase,
-        grossMarginPriceCop: calc.grossMarginPriceCop,
-        grossMarginPriceUsd: calc.grossMarginPriceUsd,
-        netMarginPriceCop: calc.netMarginPriceCop,
-        netMarginPriceUsd: calc.netMarginPriceUsd,
-        grossMarginHourlyUsd: calc.grossMarginHourlyUsd,
-        netMarginHourlyUsd: calc.netMarginHourlyUsd,
-        resultingNetMargin: calc.resultingNetMargin,
-        resultingGrossMargin: calc.resultingGrossMargin,
-        commissionAmount: calc.grossMarginCommission,
-        icaAmount: calc.grossMarginIca,
-        teamMembers: {
-          create: teamMembers.map((m: any, i: number) => {
-            const role = roleMap.get(m.roleId)!;
-            const mc = calc.members[i];
-            return {
-              roleId: m.roleId,
-              roleName: role.name,
-              roleSalary: role.baseSalary,
-              roleCompanyCost: role.companyCost,
-              dedication: m.dedication,
-              contractType: m.contractType,
-              costMonthly: mc.costMonthly,
-              costTotal: mc.costTotal,
-              hours: mc.hours,
-            };
-          }),
+      return tx.quote.create({
+        data: {
+          code,
+          clientId,
+          createdBy: req.user!.id,
+          businessLine,
+          durationMonths,
+          sellerContractType: sellerContractType || 'PRESTACION_SERVICIOS',
+          leadSource: leadSource || 'DIRECTO',
+          commissionRate: commissionRate || 0.1,
+          creditCardPayment: creditCardPayment || false,
+          factoring: factoring || false,
+          staffAugmentation: staffAugmentation || false,
+          targetGrossMargin: targetGrossMargin || 0.5,
+          targetNetMargin: targetNetMargin || 0.2,
+          trmRate: trm,
+          icaRate,
+          incomeTaxRate,
+          ccRate,
+          hoursPerMonth,
+          status: status || 'DRAFT',
+          teamCostMonthly: calc.teamCostMonthly,
+          teamCostTotal: calc.teamCostTotal,
+          fixedCosts: calc.costBase,
+          grossMarginPriceCop: calc.grossMarginPriceCop,
+          grossMarginPriceUsd: calc.grossMarginPriceUsd,
+          netMarginPriceCop: calc.netMarginPriceCop,
+          netMarginPriceUsd: calc.netMarginPriceUsd,
+          grossMarginHourlyUsd: calc.grossMarginHourlyUsd,
+          netMarginHourlyUsd: calc.netMarginHourlyUsd,
+          resultingNetMargin: calc.resultingNetMargin,
+          resultingGrossMargin: calc.resultingGrossMargin,
+          commissionAmount: calc.grossMarginCommission,
+          icaAmount: calc.grossMarginIca,
+          teamMembers: {
+            create: teamMembers.map((m: any, i: number) => {
+              const role = roleMap.get(m.roleId)!; // safe: validated above in memberInputs
+              const mc = calc.members[i];
+              return {
+                roleId: m.roleId,
+                roleName: role.name,
+                roleSalary: role.baseSalary,
+                roleCompanyCost: role.companyCost,
+                dedication: m.dedication,
+                contractType: m.contractType,
+                costMonthly: mc.costMonthly,
+                costTotal: mc.costTotal,
+                hours: mc.hours,
+              };
+            }),
+          },
         },
-      },
-      include: { client: true, teamMembers: true },
+        include: { client: true, teamMembers: true },
+      });
     });
 
     res.status(201).json(quote);

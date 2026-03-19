@@ -72,7 +72,7 @@ export default function Login() {
           </form>
 
           <p className="text-xs text-text-muted text-center mt-6">
-            Demo: admin@imagineapps.co / admin123
+            Inicia sesión con tus credenciales corporativas
           </p>
         </div>
       </div>

@@ -32,6 +32,8 @@ export default function ClientDetail() {
     ]).then(([clientRes, quotesRes]) => {
       setClient(clientRes.data);
       setQuotes(quotesRes.data);
+    }).catch(() => {
+      setClient(null);
     }).finally(() => setLoading(false));
   };
 

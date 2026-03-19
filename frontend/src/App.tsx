@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -11,6 +11,13 @@ import ClientDetail from './pages/ClientDetail';
 import AdminRoles from './pages/AdminRoles';
 import AdminParameters from './pages/AdminParameters';
 import AdminUsers from './pages/AdminUsers';
+import type { ReactNode } from 'react';
+
+function AdminGuard({ children }: { children: ReactNode }) {
+  const { isAdmin } = useAuth();
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
@@ -26,9 +33,9 @@ export default function App() {
             <Route path="/quotes/:id" element={<QuoteDetail />} />
             <Route path="/clients" element={<ClientList />} />
             <Route path="/clients/:id" element={<ClientDetail />} />
-            <Route path="/admin/roles" element={<AdminRoles />} />
-            <Route path="/admin/parameters" element={<AdminParameters />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/roles" element={<AdminGuard><AdminRoles /></AdminGuard>} />
+            <Route path="/admin/parameters" element={<AdminGuard><AdminParameters /></AdminGuard>} />
+            <Route path="/admin/users" element={<AdminGuard><AdminUsers /></AdminGuard>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

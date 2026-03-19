@@ -8,13 +8,21 @@ import { formatUSD, BUSINESS_LINE_LABELS, STATUS_LABELS, STATUS_COLORS } from '.
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/dashboard').then(({ data }) => setData(data)).finally(() => setLoading(false));
+    api.get('/dashboard')
+      .then(({ data }) => setData(data))
+      .catch(() => setError('Error al cargar el dashboard'))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
+
+  if (error) {
+    return <div className="bg-red-50 text-danger text-sm p-4 rounded-lg">{error}</div>;
   }
 
   if (!data) return null;

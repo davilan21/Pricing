@@ -85,6 +85,13 @@ export function calculateQuote(input: CalculationInput): CalculationResult {
     hoursPerMonth,
   } = input;
 
+  // Input validation
+  if (durationMonths <= 0) throw new Error('Duration must be greater than 0');
+  if (trm <= 0) throw new Error('TRM must be greater than 0');
+  if (hoursPerMonth <= 0) throw new Error('Hours per month must be greater than 0');
+  if (targetGrossMargin >= 1) throw new Error('Gross margin must be less than 100%');
+  if (teamMembers.length === 0) throw new Error('At least one team member is required');
+
   // Calculate per-member costs
   let teamCostMonthly = 0;
   let totalHours = 0;
@@ -134,7 +141,9 @@ export function calculateQuote(input: CalculationInput): CalculationResult {
   const grossHourlyUsd = totalHours > 0 ? grossMonthlyPriceUsd / totalHours : 0;
 
   // SCENARIO B: Net Margin target
-  const netMonthlyPriceCop = costBase / (1 - targetNetMargin - commissionRate - icaRate - incomeTaxRate - effectiveCcRate);
+  const netDenominator = 1 - targetNetMargin - commissionRate - icaRate - incomeTaxRate - effectiveCcRate;
+  if (netDenominator <= 0) throw new Error('Net margin configuration results in impossible pricing (deductions exceed 100%)');
+  const netMonthlyPriceCop = costBase / netDenominator;
   const netTotalPriceCop = netMonthlyPriceCop * durationMonths;
   const netCommission = netMonthlyPriceCop * commissionRate;
   const netIca = netMonthlyPriceCop * icaRate;

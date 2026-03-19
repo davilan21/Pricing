@@ -8,11 +8,15 @@ import { formatUSD, STATUS_LABELS, STATUS_COLORS, BUSINESS_LINE_LABELS } from '.
 export default function QuoteList() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<QuoteStatus | ''>('');
 
   useEffect(() => {
-    api.get('/quotes').then(({ data }) => setQuotes(data)).finally(() => setLoading(false));
+    api.get('/quotes')
+      .then(({ data }) => setQuotes(data))
+      .catch(() => setError('Error al cargar las cotizaciones'))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = quotes.filter(q => {
@@ -27,6 +31,10 @@ export default function QuoteList() {
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
+
+  if (error) {
+    return <div className="bg-red-50 text-danger text-sm p-4 rounded-lg">{error}</div>;
   }
 
   return (

@@ -26,7 +26,7 @@ export default function ClientList() {
 
   const fetchClients = () => {
     setLoading(true);
-    api.get('/clients').then(({ data }) => setClients(data)).finally(() => setLoading(false));
+    api.get('/clients').then(({ data }) => setClients(data)).catch(() => setClients([])).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchClients(); }, []);

@@ -21,8 +21,8 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-pricing_user}:${POSTGRES_PASSWORD:-pricing_pass}@db:5432/${POSTGRES_DB:-pricing_db}?schema=public
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-imagine-apps-pricing-secret-key-2026}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-imagine-apps-pricing-refresh-secret-2026}
       PORT: "3001"
     depends_on:
       db:

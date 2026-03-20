@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
 import { authRouter } from './routes/auth';
 import { usersRouter } from './routes/users';
 import { rolesRouter } from './routes/roles';
@@ -17,7 +18,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }));
 app.use(express.json());
 
@@ -36,7 +37,14 @@ app.get('/api/health', (_req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+// Serve frontend static files in production/preview
+const frontendDist = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendDist));
+app.get('{*path}', (_req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 

@@ -27,7 +27,8 @@ COPY --from=base /app/package.json /app/package-lock.json* ./
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/prisma ./prisma
+COPY docker-entrypoint.sh ./
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "npx prisma db push --skip-generate && npx tsx prisma/seed.ts && node dist/index.js"]
+CMD ["./docker-entrypoint.sh"]

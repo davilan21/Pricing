@@ -1,8 +1,8 @@
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
 WORKDIR /app
 
-# Install OpenSSL - required by Prisma on Alpine
-RUN apk add --no-cache openssl
+# Install OpenSSL - required by Prisma
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 COPY package.json package-lock.json* ./
@@ -17,11 +17,11 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 WORKDIR /app
 
-# Install OpenSSL - required by Prisma on Alpine
-RUN apk add --no-cache openssl
+# Install OpenSSL - required by Prisma
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=base /app/package.json /app/package-lock.json* ./
 COPY --from=base /app/node_modules ./node_modules

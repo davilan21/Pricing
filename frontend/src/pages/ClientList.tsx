@@ -132,7 +132,7 @@ export default function ClientList() {
                     <td className="px-5 py-3 text-text-muted hidden md:table-cell">{client.email || '—'}</td>
                     <td className="px-5 py-3 text-text-muted hidden sm:table-cell">{client.phone || '—'}</td>
                     <td className="px-5 py-3 hidden sm:table-cell">
-                      <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      <span className="inline-flex items-center justify-center w-6 h-6 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
                         {client._count?.quotes ?? 0}
                       </span>
                     </td>

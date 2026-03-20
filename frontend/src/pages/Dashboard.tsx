@@ -28,7 +28,7 @@ export default function Dashboard() {
   if (!data) return null;
 
   const cards = [
-    { label: 'Total Cotizaciones', value: data.totalQuotes, icon: FileText, color: 'bg-blue-50 text-blue-600' },
+    { label: 'Total Cotizaciones', value: data.totalQuotes, icon: FileText, color: 'bg-orange-50 text-orange-600' },
     { label: 'Este Mes', value: data.quotesThisMonth, icon: TrendingUp, color: 'bg-green-50 text-green-600' },
     { label: 'Valor Total (USD)', value: formatUSD(data.totalValueUsd), icon: Users, color: 'bg-purple-50 text-purple-600' },
   ];

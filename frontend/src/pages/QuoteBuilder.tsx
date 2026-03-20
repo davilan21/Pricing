@@ -508,7 +508,7 @@ export default function QuoteBuilder() {
                       {t.description && <p className="text-sm text-text-muted">{t.description}</p>}
                       <div className="flex flex-wrap gap-2 mt-2">
                         {t.members.map(m => (
-                          <span key={m.id} className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                          <span key={m.id} className="text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded">
                             {m.role.name} ({(m.dedication * 100).toFixed(0)}%)
                           </span>
                         ))}
@@ -533,7 +533,7 @@ export default function QuoteBuilder() {
             {/* Gross Margin Scenario */}
             <div className="bg-white rounded-xl border border-border p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-blue-700">Jugar con Gross Margin</h3>
+                <h3 className="font-semibold text-orange-700">Jugar con Gross Margin</h3>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   calculation.resultingNetMargin >= config.targetNetMargin
                     ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -775,7 +775,7 @@ export default function QuoteBuilder() {
               <h3 className="font-medium text-text-muted mb-2">Equipo</h3>
               <div className="flex flex-wrap gap-2">
                 {teamMembers.map((m, i) => (
-                  <span key={i} className="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg">
+                  <span key={i} className="text-sm bg-orange-50 text-orange-700 px-3 py-1.5 rounded-lg">
                     {m.roleName} ({formatPercent(m.dedication)})
                   </span>
                 ))}

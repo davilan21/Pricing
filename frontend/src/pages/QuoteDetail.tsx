@@ -159,7 +159,7 @@ export default function QuoteDetail() {
       {/* Pricing */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-white rounded-xl border border-border p-5">
-          <h2 className="font-semibold text-blue-700 mb-3">Gross Margin</h2>
+          <h2 className="font-semibold text-orange-700 mb-3">Gross Margin</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-text-muted">Target Gross Margin</span><span className="font-medium">{formatPercent(quote.targetGrossMargin)}</span></div>
             <div className="flex justify-between"><span className="text-text-muted">Precio Total COP</span><span className="font-bold">{formatCOP(quote.grossMarginPriceCop || 0)}</span></div>

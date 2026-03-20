@@ -112,12 +112,12 @@ export default function AdminUsers() {
                   <td className="px-5 py-3 font-medium">
                     {user.name}
                     {user.id === currentUser?.id && (
-                      <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">Tú</span>
+                      <span className="ml-2 text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full">Tú</span>
                     )}
                   </td>
                   <td className="px-5 py-3 text-text-muted">{user.email}</td>
                   <td className="px-5 py-3 hidden sm:table-cell">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
                       {user.role === 'ADMIN' ? 'Administrador' : 'Comercial'}
                     </span>
                   </td>

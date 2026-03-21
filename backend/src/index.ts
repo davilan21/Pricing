@@ -11,6 +11,7 @@ import { parametersRouter } from './routes/parameters';
 import { templatesRouter } from './routes/templates';
 import { quotesRouter } from './routes/quotes';
 import { dashboardRouter } from './routes/dashboard';
+import { commercialConditionsRouter } from './routes/commercialConditions';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use('/api/parameters', parametersRouter);
 app.use('/api/templates', templatesRouter);
 app.use('/api/quotes', quotesRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/commercial-conditions', commercialConditionsRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

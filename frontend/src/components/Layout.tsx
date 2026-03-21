@@ -3,7 +3,7 @@ import { Link, useLocation, Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, FileText, Users, Settings, UserCog, FolderOpen,
-  LogOut, Menu, ChevronDown
+  LogOut, Menu, ChevronDown, Briefcase
 } from 'lucide-react';
 
 export default function Layout() {
@@ -30,6 +30,7 @@ export default function Layout() {
       { path: '/admin/roles', label: 'Catálogo de Roles', icon: FolderOpen },
       { path: '/admin/parameters', label: 'Parámetros', icon: Settings },
       { path: '/admin/users', label: 'Usuarios', icon: UserCog },
+      { path: '/admin/commercial-conditions', label: 'Condiciones Comerciales', icon: Briefcase },
     ] : []),
   ];
 

@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Save, Plus, Trash2, Layers, Check } from 'lucide
 import api from '../lib/api';
 import type {
   RoleCatalog, Client, TeamTemplate, CommissionStructure, Parameter,
-  ContractType, LeadSource, BusinessLine, CalculationResult
+  ContractType, LeadSource, BusinessLine, CalculationResult, CommercialCondition
 } from '../types';
 import {
   formatCOP, formatUSD, formatPercent, CONTRACT_TYPE_LABELS,
@@ -44,6 +44,7 @@ export default function QuoteBuilder() {
   const [clients, setClients] = useState<Client[]>([]);
   const [templates, setTemplates] = useState<TeamTemplate[]>([]);
   const [commissions, setCommissions] = useState<CommissionStructure[]>([]);
+  const [myConditions, setMyConditions] = useState<CommercialCondition[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showNewClient, setShowNewClient] = useState(false);
   const [newClient, setNewClient] = useState({ name: '', company: '', email: '', phone: '' });
@@ -72,11 +73,13 @@ export default function QuoteBuilder() {
       api.get('/clients'),
       api.get('/templates'),
       api.get('/parameters'),
-    ]).then(([rolesRes, clientsRes, templatesRes, paramsRes]) => {
+      api.get('/commercial-conditions/me'),
+    ]).then(([rolesRes, clientsRes, templatesRes, paramsRes, conditionsRes]) => {
       setRoles(rolesRes.data);
       setClients(clientsRes.data);
       setTemplates(templatesRes.data);
       setCommissions(paramsRes.data.commissions);
+      setMyConditions(conditionsRes.data);
       const p: Record<string, string> = {};
       paramsRes.data.parameters.forEach((param: Parameter) => { p[param.key] = param.value; });
       // Set default margins from params
@@ -88,13 +91,18 @@ export default function QuoteBuilder() {
     });
   }, []);
 
-  // Auto-fill commission from lead source
+  // Auto-fill commission: priority 1 = per-commercial condition, priority 2 = lead source
   useEffect(() => {
+    const condition = myConditions.find(c => c.businessLine === config.businessLine);
+    if (condition) {
+      setConfig(prev => ({ ...prev, commissionRate: condition.commissionRate }));
+      return;
+    }
     const comm = commissions.find(c => c.leadSource === config.leadSource);
     if (comm) {
       setConfig(prev => ({ ...prev, commissionRate: comm.total }));
     }
-  }, [config.leadSource, commissions]);
+  }, [config.businessLine, config.leadSource, myConditions, commissions]);
 
   // Calculate on step 3
   const doCalculation = useCallback(async () => {

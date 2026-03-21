@@ -11,6 +11,7 @@ import ClientDetail from './pages/ClientDetail';
 import AdminRoles from './pages/AdminRoles';
 import AdminParameters from './pages/AdminParameters';
 import AdminUsers from './pages/AdminUsers';
+import AdminCommercialConditions from './pages/AdminCommercialConditions';
 import type { ReactNode } from 'react';
 
 function AdminGuard({ children }: { children: ReactNode }) {
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/admin/roles" element={<AdminGuard><AdminRoles /></AdminGuard>} />
             <Route path="/admin/parameters" element={<AdminGuard><AdminParameters /></AdminGuard>} />
             <Route path="/admin/users" element={<AdminGuard><AdminUsers /></AdminGuard>} />
+            <Route path="/admin/commercial-conditions" element={<AdminGuard><AdminCommercialConditions /></AdminGuard>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

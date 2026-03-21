@@ -2,20 +2,30 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Users, TrendingUp, PlusCircle } from 'lucide-react';
 import api from '../lib/api';
-import type { DashboardData } from '../types';
-import { formatUSD, BUSINESS_LINE_LABELS, STATUS_LABELS, STATUS_COLORS } from '../lib/utils';
+import { useAuth } from '../context/AuthContext';
+import type { DashboardData, CommercialCondition } from '../types';
+import { formatUSD, formatPercent, BUSINESS_LINE_LABELS, STATUS_LABELS, STATUS_COLORS } from '../lib/utils';
 
 export default function Dashboard() {
+  const { isAdmin } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [myConditions, setMyConditions] = useState<CommercialCondition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/dashboard')
-      .then(({ data }) => setData(data))
+    const promises: Promise<any>[] = [api.get('/dashboard')];
+    if (!isAdmin) {
+      promises.push(api.get('/commercial-conditions/me'));
+    }
+    Promise.all(promises)
+      .then(([dashRes, condRes]) => {
+        setData(dashRes.data);
+        if (condRes) setMyConditions(condRes.data);
+      })
       .catch(() => setError('Error al cargar el dashboard'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [isAdmin]);
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
@@ -75,6 +85,21 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      {/* Commercial conditions card */}
+      {!isAdmin && myConditions.length > 0 && (
+        <div className="bg-white rounded-xl border border-border p-5">
+          <h2 className="font-semibold mb-3">Mis Condiciones Comerciales</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {myConditions.map(c => (
+              <div key={c.id} className="bg-surface-hover rounded-lg p-3 text-center">
+                <p className="text-xs text-text-muted mb-1">{BUSINESS_LINE_LABELS[c.businessLine]}</p>
+                <p className="text-lg font-bold text-primary">{formatPercent(c.commissionRate)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent quotes */}
       <div className="bg-white rounded-xl border border-border">

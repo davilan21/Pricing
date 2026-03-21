@@ -44,6 +44,13 @@ export interface CommissionStructure {
   total: number;
 }
 
+export interface CommercialCondition {
+  id: string;
+  userId: string;
+  businessLine: BusinessLine;
+  commissionRate: number;
+}
+
 export interface TeamTemplate {
   id: string;
   name: string;

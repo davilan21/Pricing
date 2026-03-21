@@ -2,21 +2,18 @@ import { useState, useEffect } from 'react';
 import { Save, RefreshCw } from 'lucide-react';
 import api from '../lib/api';
 import type { User, CommercialCondition, BusinessLine } from '../types';
-import { BUSINESS_LINE_LABELS } from '../lib/utils';
-
-const BUSINESS_LINES: BusinessLine[] = ['EQUIPO_DEDICADO', 'DESCUBRIMIENTO', 'SPRINT_MVP', 'CASO_EXPRESS'];
 
 interface ConditionForm {
-  businessLine: BusinessLine;
+  businessLineId: string;
+  businessLineName: string;
   commissionRate: string;
 }
 
 export default function AdminCommercialConditions() {
   const [commercials, setCommercials] = useState<User[]>([]);
+  const [businessLines, setBusinessLines] = useState<BusinessLine[]>([]);
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [conditions, setConditions] = useState<ConditionForm[]>(
-    BUSINESS_LINES.map(bl => ({ businessLine: bl, commissionRate: '0' }))
-  );
+  const [conditions, setConditions] = useState<ConditionForm[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingConditions, setLoadingConditions] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -24,16 +21,28 @@ export default function AdminCommercialConditions() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/users').then(({ data }) => {
-      const filtered = (data as User[]).filter(u => u.role === 'COMMERCIAL' && u.isActive);
+    Promise.all([
+      api.get('/users'),
+      api.get('/business-lines'),
+    ]).then(([usersRes, blRes]) => {
+      const filtered = (usersRes.data as User[]).filter(u => u.role === 'COMMERCIAL' && u.isActive);
       setCommercials(filtered);
+      setBusinessLines(blRes.data);
+      setConditions(buildEmptyConditions(blRes.data));
     }).finally(() => setLoading(false));
   }, []);
+
+  const buildEmptyConditions = (lines: BusinessLine[]): ConditionForm[] =>
+    lines.filter(bl => bl.isActive).map(bl => ({
+      businessLineId: bl.id,
+      businessLineName: bl.name,
+      commissionRate: '0',
+    }));
 
   const loadConditions = async (userId: string) => {
     setSelectedUserId(userId);
     if (!userId) {
-      setConditions(BUSINESS_LINES.map(bl => ({ businessLine: bl, commissionRate: '0' })));
+      setConditions(buildEmptyConditions(businessLines));
       return;
     }
     setLoadingConditions(true);
@@ -41,10 +50,11 @@ export default function AdminCommercialConditions() {
       const { data } = await api.get(`/commercial-conditions/${userId}`);
       const existing = data as CommercialCondition[];
       setConditions(
-        BUSINESS_LINES.map(bl => {
-          const found = existing.find(c => c.businessLine === bl);
+        businessLines.filter(bl => bl.isActive).map(bl => {
+          const found = existing.find(c => c.businessLineId === bl.id);
           return {
-            businessLine: bl,
+            businessLineId: bl.id,
+            businessLineName: bl.name,
             commissionRate: found ? (found.commissionRate * 100).toFixed(2) : '0',
           };
         })
@@ -56,9 +66,9 @@ export default function AdminCommercialConditions() {
     }
   };
 
-  const handleChange = (businessLine: BusinessLine, value: string) => {
+  const handleChange = (businessLineId: string, value: string) => {
     setConditions(prev =>
-      prev.map(c => c.businessLine === businessLine ? { ...c, commissionRate: value } : c)
+      prev.map(c => c.businessLineId === businessLineId ? { ...c, commissionRate: value } : c)
     );
   };
 
@@ -70,7 +80,7 @@ export default function AdminCommercialConditions() {
     try {
       await api.put(`/commercial-conditions/${selectedUserId}`, {
         conditions: conditions.map(c => ({
-          businessLine: c.businessLine,
+          businessLineId: c.businessLineId,
           commissionRate: parseFloat(c.commissionRate) / 100,
         })),
       });
@@ -130,13 +140,13 @@ export default function AdminCommercialConditions() {
                     </thead>
                     <tbody>
                       {conditions.map(c => (
-                        <tr key={c.businessLine} className="border-t border-border">
-                          <td className="px-4 py-3 font-medium">{BUSINESS_LINE_LABELS[c.businessLine]}</td>
+                        <tr key={c.businessLineId} className="border-t border-border">
+                          <td className="px-4 py-3 font-medium">{c.businessLineName}</td>
                           <td className="px-4 py-3">
                             <input
                               type="number"
                               value={c.commissionRate}
-                              onChange={e => handleChange(c.businessLine, e.target.value)}
+                              onChange={e => handleChange(c.businessLineId, e.target.value)}
                               step="0.01"
                               min="0"
                               max="100"

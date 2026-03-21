@@ -70,6 +70,7 @@ quotesRouter.get('/', async (req: AuthRequest, res: Response) => {
     include: {
       client: { select: { name: true, company: true } },
       creator: { select: { name: true } },
+      businessLine: { select: { id: true, name: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -83,6 +84,7 @@ quotesRouter.get('/:id', async (req: AuthRequest, res: Response) => {
     include: {
       client: true,
       creator: { select: { name: true, email: true } },
+      businessLine: { select: { id: true, name: true } },
       teamMembers: true,
     },
   });
@@ -97,12 +99,12 @@ quotesRouter.get('/:id', async (req: AuthRequest, res: Response) => {
 quotesRouter.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const {
-      clientId, businessLine, durationMonths, sellerContractType, leadSource,
+      clientId, businessLineId, durationMonths, sellerContractType, leadSource,
       commissionRate, creditCardPayment, factoring, staffAugmentation,
       targetGrossMargin, targetNetMargin, teamMembers, status,
     } = req.body;
 
-    if (!clientId || !businessLine || !durationMonths || !teamMembers?.length) {
+    if (!clientId || !businessLineId || !durationMonths || !teamMembers?.length) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -154,7 +156,7 @@ quotesRouter.post('/', async (req: AuthRequest, res: Response) => {
           code,
           clientId,
           createdBy: req.user!.id,
-          businessLine,
+          businessLineId,
           durationMonths,
           sellerContractType: sellerContractType || 'PRESTACION_SERVICIOS',
           leadSource: leadSource || 'DIRECTO',
@@ -201,7 +203,7 @@ quotesRouter.post('/', async (req: AuthRequest, res: Response) => {
             }),
           },
         },
-        include: { client: true, teamMembers: true },
+        include: { client: true, businessLine: true, teamMembers: true },
       });
     });
 
@@ -228,7 +230,7 @@ quotesRouter.put('/:id', async (req: AuthRequest, res: Response) => {
     const quote = await prisma.quote.update({
       where: { id: req.params.id as string },
       data: { status },
-      include: { client: true, teamMembers: true },
+      include: { client: true, businessLine: true, teamMembers: true },
     });
     res.json(quote);
   } catch {

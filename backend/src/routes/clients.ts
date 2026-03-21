@@ -30,8 +30,9 @@ clientsRouter.get('/:id', async (req: AuthRequest, res: Response) => {
     where: { id: req.params.id as string },
     include: {
       quotes: { orderBy: { createdAt: 'desc' }, select: {
-        id: true, code: true, businessLine: true, status: true, createdAt: true,
+        id: true, code: true, status: true, createdAt: true,
         grossMarginPriceUsd: true, netMarginPriceUsd: true,
+        businessLine: { select: { id: true, name: true } },
       }},
     },
   });

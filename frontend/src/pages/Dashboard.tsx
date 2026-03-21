@@ -4,7 +4,7 @@ import { FileText, Users, TrendingUp, PlusCircle } from 'lucide-react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import type { DashboardData, CommercialCondition } from '../types';
-import { formatUSD, formatPercent, BUSINESS_LINE_LABELS, STATUS_LABELS, STATUS_COLORS } from '../lib/utils';
+import { formatUSD, formatPercent, STATUS_LABELS, STATUS_COLORS } from '../lib/utils';
 
 export default function Dashboard() {
   const { isAdmin } = useAuth();
@@ -93,7 +93,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {myConditions.map(c => (
               <div key={c.id} className="bg-surface-hover rounded-lg p-3 text-center">
-                <p className="text-xs text-text-muted mb-1">{BUSINESS_LINE_LABELS[c.businessLine]}</p>
+                <p className="text-xs text-text-muted mb-1">{c.businessLine?.name || 'N/A'}</p>
                 <p className="text-lg font-bold text-primary">{formatPercent(c.commissionRate)}</p>
               </div>
             ))}
@@ -130,7 +130,7 @@ export default function Dashboard() {
                       <Link to={`/quotes/${q.id}`} className="text-primary font-medium hover:underline">{q.code}</Link>
                     </td>
                     <td className="px-5 py-3">{q.client?.name || '-'}</td>
-                    <td className="px-5 py-3 hidden sm:table-cell">{BUSINESS_LINE_LABELS[q.businessLine]}</td>
+                    <td className="px-5 py-3 hidden sm:table-cell">{q.businessLine?.name || 'N/A'}</td>
                     <td className="px-5 py-3 font-medium">{formatUSD(q.grossMarginPriceUsd || 0)}</td>
                     <td className="px-5 py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[q.status]}`}>

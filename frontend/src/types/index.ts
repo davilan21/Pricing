@@ -44,10 +44,19 @@ export interface CommissionStructure {
   total: number;
 }
 
+export interface BusinessLine {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface CommercialCondition {
   id: string;
   userId: string;
-  businessLine: BusinessLine;
+  businessLineId: string;
+  businessLine?: BusinessLine;
   commissionRate: number;
 }
 
@@ -68,7 +77,6 @@ export interface TeamTemplateMember {
 
 export type ContractType = 'NOMINA' | 'PRESTACION_SERVICIOS' | 'DEEL_ONTOP';
 export type LeadSource = 'MARKETING' | 'DIRECTO' | 'REFERIDO_IMAGINE' | 'NETWORK_COLD_CALLING';
-export type BusinessLine = 'EQUIPO_DEDICADO' | 'DESCUBRIMIENTO' | 'SPRINT_MVP' | 'CASO_EXPRESS';
 export type QuoteStatus = 'DRAFT' | 'SENT' | 'APPROVED' | 'REJECTED';
 
 export interface QuoteTeamMember {
@@ -89,7 +97,8 @@ export interface Quote {
   code: string;
   clientId: string;
   createdBy: string;
-  businessLine: BusinessLine;
+  businessLineId: string;
+  businessLine?: BusinessLine;
   durationMonths: number;
   sellerContractType: ContractType;
   leadSource: LeadSource;
@@ -125,7 +134,7 @@ export interface Quote {
   teamMembers?: QuoteTeamMember[];
 }
 
-export type QuoteSummary = Pick<Quote, 'id' | 'code' | 'businessLine' | 'status' | 'createdAt' | 'grossMarginPriceUsd' | 'netMarginPriceUsd'>;
+export type QuoteSummary = Pick<Quote, 'id' | 'code' | 'businessLine' | 'businessLineId' | 'status' | 'createdAt' | 'grossMarginPriceUsd' | 'netMarginPriceUsd'>;
 
 export interface CalculationResult {
   members: MemberCalculation[];

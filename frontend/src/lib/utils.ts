@@ -44,13 +44,6 @@ export const LEAD_SOURCE_LABELS: Record<string, string> = {
   NETWORK_COLD_CALLING: 'Network / Cold Calling',
 };
 
-export const BUSINESS_LINE_LABELS: Record<string, string> = {
-  EQUIPO_DEDICADO: 'Equipo Dedicado',
-  DESCUBRIMIENTO: 'Descubrimiento',
-  SPRINT_MVP: 'Sprint MVP',
-  CASO_EXPRESS: 'Caso Express',
-};
-
 export const STATUS_LABELS: Record<string, string> = {
   DRAFT: 'Borrador',
   SENT: 'Enviada',

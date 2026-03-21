@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Pencil, X, FileText, PlusCircle } from 'lucide-react';
 import api from '../lib/api';
 import type { Client, Quote } from '../types';
-import { formatUSD, STATUS_LABELS, STATUS_COLORS, BUSINESS_LINE_LABELS } from '../lib/utils';
+import { formatUSD, STATUS_LABELS, STATUS_COLORS } from '../lib/utils';
 
 interface ClientForm {
   name: string;
@@ -149,7 +149,7 @@ export default function ClientDetail() {
                 {quotes.map(q => (
                   <tr key={q.id} className="border-t border-border hover:bg-surface-hover transition-colors cursor-pointer" onClick={() => navigate(`/quotes/${q.id}`)}>
                     <td className="px-5 py-3 font-mono text-xs font-medium text-primary">{q.code}</td>
-                    <td className="px-5 py-3 text-text-muted hidden sm:table-cell">{BUSINESS_LINE_LABELS[q.businessLine]}</td>
+                    <td className="px-5 py-3 text-text-muted hidden sm:table-cell">{q.businessLine?.name || 'N/A'}</td>
                     <td className="px-5 py-3 font-medium">{formatUSD(q.grossMarginPriceUsd ?? q.netMarginPriceUsd ?? 0)}</td>
                     <td className="px-5 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[q.status]}`}>

@@ -30,11 +30,6 @@ function formatUSD(v: number) { return `$${v.toFixed(2).replace(/\B(?=(\d{3})+(?
 function formatCOP(v: number) { return `$${Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}` }
 function formatPct(v: number) { return `${(v * 100).toFixed(1)}%` }
 
-const BUSINESS_LINES: Record<string, string> = {
-  EQUIPO_DEDICADO: 'Equipo Dedicado', DESCUBRIMIENTO: 'Descubrimiento',
-  SPRINT_MVP: 'Sprint MVP', CASO_EXPRESS: 'Caso Express',
-};
-
 interface Props { quote: Quote }
 
 export default function QuotePDF({ quote }: Props) {
@@ -67,7 +62,7 @@ export default function QuotePDF({ quote }: Props) {
           <Text style={styles.sectionTitle}>Información del Proyecto</Text>
           <View style={styles.row}>
             <Text style={styles.label}>Línea de Negocio</Text>
-            <Text style={styles.value}>{BUSINESS_LINES[quote.businessLine]}</Text>
+            <Text style={styles.value}>{quote.businessLine?.name || 'N/A'}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Duración</Text>

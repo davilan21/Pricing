@@ -6,7 +6,7 @@ import type { Quote, QuoteStatus } from '../types';
 import {
   formatCOP, formatUSD, formatPercent,
   STATUS_LABELS, STATUS_COLORS,
-  BUSINESS_LINE_LABELS, CONTRACT_TYPE_LABELS, LEAD_SOURCE_LABELS,
+  CONTRACT_TYPE_LABELS, LEAD_SOURCE_LABELS,
 } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 
@@ -109,7 +109,7 @@ export default function QuoteDetail() {
         <div className="bg-white rounded-xl border border-border p-5">
           <h2 className="font-semibold mb-3">Configuración</h2>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-text-muted">Línea de Negocio</span><span>{BUSINESS_LINE_LABELS[quote.businessLine]}</span></div>
+            <div className="flex justify-between"><span className="text-text-muted">Línea de Negocio</span><span>{quote.businessLine?.name || 'N/A'}</span></div>
             <div className="flex justify-between"><span className="text-text-muted">Duración</span><span>{quote.durationMonths} mes(es)</span></div>
             <div className="flex justify-between"><span className="text-text-muted">Contrato Vendedor</span><span>{CONTRACT_TYPE_LABELS[quote.sellerContractType]}</span></div>
             <div className="flex justify-between"><span className="text-text-muted">Fuente del Lead</span><span>{LEAD_SOURCE_LABELS[quote.leadSource]}</span></div>

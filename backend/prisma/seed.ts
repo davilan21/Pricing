@@ -32,6 +32,22 @@ async function main() {
     },
   });
 
+  // Business lines
+  const businessLines = [
+    { id: 'bl-equipo-dedicado', name: 'Equipo Dedicado' },
+    { id: 'bl-descubrimiento', name: 'Descubrimiento' },
+    { id: 'bl-sprint-mvp', name: 'Sprint MVP' },
+    { id: 'bl-caso-express', name: 'Caso Express' },
+  ];
+
+  for (const bl of businessLines) {
+    await prisma.businessLine.upsert({
+      where: { id: bl.id },
+      update: {},
+      create: bl,
+    });
+  }
+
   // Role catalog from Excel "Parámetros" sheet
   const roles = [
     { name: 'Forward Deployed Product Manager', baseSalary: 5000000, companyCost: 6900000 },

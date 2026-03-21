@@ -8,7 +8,7 @@ import type {
 } from '../types';
 import {
   formatCOP, formatUSD, formatPercent, CONTRACT_TYPE_LABELS,
-  LEAD_SOURCE_LABELS, BUSINESS_LINE_LABELS
+  LEAD_SOURCE_LABELS
 } from '../lib/utils';
 
 interface TeamMember {
@@ -22,7 +22,7 @@ interface TeamMember {
 
 interface QuoteConfig {
   clientId: string;
-  businessLine: BusinessLine;
+  businessLineId: string;
   durationMonths: number;
   sellerContractType: ContractType;
   leadSource: LeadSource;
@@ -45,6 +45,7 @@ export default function QuoteBuilder() {
   const [templates, setTemplates] = useState<TeamTemplate[]>([]);
   const [commissions, setCommissions] = useState<CommissionStructure[]>([]);
   const [myConditions, setMyConditions] = useState<CommercialCondition[]>([]);
+  const [businessLines, setBusinessLines] = useState<BusinessLine[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showNewClient, setShowNewClient] = useState(false);
   const [newClient, setNewClient] = useState({ name: '', company: '', email: '', phone: '' });
@@ -52,7 +53,7 @@ export default function QuoteBuilder() {
   // Quote state
   const [config, setConfig] = useState<QuoteConfig>({
     clientId: '',
-    businessLine: 'EQUIPO_DEDICADO',
+    businessLineId: '',
     durationMonths: 1,
     sellerContractType: 'PRESTACION_SERVICIOS',
     leadSource: 'DIRECTO',
@@ -74,12 +75,18 @@ export default function QuoteBuilder() {
       api.get('/templates'),
       api.get('/parameters'),
       api.get('/commercial-conditions/me'),
-    ]).then(([rolesRes, clientsRes, templatesRes, paramsRes, conditionsRes]) => {
+      api.get('/business-lines'),
+    ]).then(([rolesRes, clientsRes, templatesRes, paramsRes, conditionsRes, blRes]) => {
       setRoles(rolesRes.data);
       setClients(clientsRes.data);
       setTemplates(templatesRes.data);
       setCommissions(paramsRes.data.commissions);
       setMyConditions(conditionsRes.data);
+      const lines = blRes.data as BusinessLine[];
+      setBusinessLines(lines);
+      if (lines.length > 0) {
+        setConfig(prev => ({ ...prev, businessLineId: prev.businessLineId || lines[0].id }));
+      }
       const p: Record<string, string> = {};
       paramsRes.data.parameters.forEach((param: Parameter) => { p[param.key] = param.value; });
       // Set default margins from params
@@ -93,7 +100,7 @@ export default function QuoteBuilder() {
 
   // Auto-fill commission: priority 1 = per-commercial condition, priority 2 = lead source
   useEffect(() => {
-    const condition = myConditions.find(c => c.businessLine === config.businessLine);
+    const condition = myConditions.find(c => c.businessLineId === config.businessLineId);
     if (condition) {
       setConfig(prev => ({ ...prev, commissionRate: condition.commissionRate }));
       return;
@@ -102,7 +109,7 @@ export default function QuoteBuilder() {
     if (comm) {
       setConfig(prev => ({ ...prev, commissionRate: comm.total }));
     }
-  }, [config.businessLine, config.leadSource, myConditions, commissions]);
+  }, [config.businessLineId, config.leadSource, myConditions, commissions]);
 
   // Calculate on step 3
   const doCalculation = useCallback(async () => {
@@ -198,7 +205,7 @@ export default function QuoteBuilder() {
   };
 
   const canProceed = () => {
-    if (step === 1) return config.clientId && config.durationMonths > 0;
+    if (step === 1) return config.clientId && config.businessLineId && config.durationMonths > 0;
     if (step === 2) return teamMembers.length > 0;
     return true;
   };
@@ -263,11 +270,12 @@ export default function QuoteBuilder() {
             <div>
               <label className="block text-sm font-medium mb-1">Línea de Negocio</label>
               <select
-                value={config.businessLine}
-                onChange={e => setConfig(prev => ({ ...prev, businessLine: e.target.value as BusinessLine }))}
+                value={config.businessLineId}
+                onChange={e => setConfig(prev => ({ ...prev, businessLineId: e.target.value }))}
                 className="w-full px-3 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
-                {Object.entries(BUSINESS_LINE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                <option value="">Seleccionar línea...</option>
+                {businessLines.map(bl => <option key={bl.id} value={bl.id}>{bl.name}</option>)}
               </select>
             </div>
 
@@ -759,7 +767,7 @@ export default function QuoteBuilder() {
                 <h3 className="font-medium text-text-muted">Configuración</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between"><span className="text-text-muted">Cliente</span><span>{clients.find(c => c.id === config.clientId)?.name}</span></div>
-                  <div className="flex justify-between"><span className="text-text-muted">Línea</span><span>{BUSINESS_LINE_LABELS[config.businessLine]}</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Línea</span><span>{businessLines.find(bl => bl.id === config.businessLineId)?.name}</span></div>
                   <div className="flex justify-between"><span className="text-text-muted">Duración</span><span>{config.durationMonths} mes(es)</span></div>
                   <div className="flex justify-between"><span className="text-text-muted">Lead Source</span><span>{LEAD_SOURCE_LABELS[config.leadSource]}</span></div>
                   <div className="flex justify-between"><span className="text-text-muted">Comisión</span><span>{formatPercent(config.commissionRate)}</span></div>

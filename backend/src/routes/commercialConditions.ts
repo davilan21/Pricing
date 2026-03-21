@@ -9,7 +9,8 @@ commercialConditionsRouter.use(authenticate);
 commercialConditionsRouter.get('/me', async (req: AuthRequest, res: Response) => {
   const conditions = await prisma.commercialCondition.findMany({
     where: { userId: req.user!.id },
-    orderBy: { businessLine: 'asc' },
+    include: { businessLine: { select: { id: true, name: true } } },
+    orderBy: { businessLine: { name: 'asc' } },
   });
   res.json(conditions);
 });
@@ -18,7 +19,8 @@ commercialConditionsRouter.get('/me', async (req: AuthRequest, res: Response) =>
 commercialConditionsRouter.get('/:userId', requireAdmin, async (req: AuthRequest, res: Response) => {
   const conditions = await prisma.commercialCondition.findMany({
     where: { userId: req.params.userId as string },
-    orderBy: { businessLine: 'asc' },
+    include: { businessLine: { select: { id: true, name: true } } },
+    orderBy: { businessLine: { name: 'asc' } },
   });
   res.json(conditions);
 });
@@ -48,18 +50,18 @@ commercialConditionsRouter.put('/:userId', requireAdmin, async (req: AuthRequest
 
     // Upsert each condition
     await Promise.all(
-      conditions.map((c: { businessLine: string; commissionRate: number }) =>
+      conditions.map((c: { businessLineId: string; commissionRate: number }) =>
         prisma.commercialCondition.upsert({
           where: {
-            userId_businessLine: {
+            userId_businessLineId: {
               userId,
-              businessLine: c.businessLine as any,
+              businessLineId: c.businessLineId,
             },
           },
           update: { commissionRate: c.commissionRate },
           create: {
             userId,
-            businessLine: c.businessLine as any,
+            businessLineId: c.businessLineId,
             commissionRate: c.commissionRate,
           },
         })
@@ -68,7 +70,8 @@ commercialConditionsRouter.put('/:userId', requireAdmin, async (req: AuthRequest
 
     const updated = await prisma.commercialCondition.findMany({
       where: { userId },
-      orderBy: { businessLine: 'asc' },
+      include: { businessLine: { select: { id: true, name: true } } },
+      orderBy: { businessLine: { name: 'asc' } },
     });
 
     res.json(updated);

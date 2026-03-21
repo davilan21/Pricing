@@ -19,6 +19,7 @@ dashboardRouter.get('/', async (req: AuthRequest, res: Response) => {
         include: {
           client: { select: { name: true, company: true } },
           creator: { select: { name: true } },
+          businessLine: { select: { id: true, name: true } },
         },
         orderBy: { createdAt: 'desc' },
         take: 10,

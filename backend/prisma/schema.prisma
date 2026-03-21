@@ -26,13 +26,6 @@ enum LeadSource {
   NETWORK_COLD_CALLING
 }
 
-enum BusinessLine {
-  EQUIPO_DEDICADO
-  DESCUBRIMIENTO
-  SPRINT_MVP
-  CASO_EXPRESS
-}
-
 enum QuoteStatus {
   DRAFT
   SENT
@@ -90,6 +83,19 @@ model RoleCatalog {
   @@map("role_catalog")
 }
 
+model BusinessLine {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quotes               Quote[]
+  commercialConditions CommercialCondition[]
+
+  @@map("business_lines")
+}
+
 model Parameter {
   id       String @id @default(uuid())
   key      String @unique
@@ -110,17 +116,18 @@ model CommissionStructure {
 }
 
 model CommercialCondition {
-  id             String       @id @default(uuid())
+  id             String @id @default(uuid())
   userId         String
-  businessLine   BusinessLine
+  businessLineId String
   commissionRate Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessLine BusinessLine @relation(fields: [businessLineId], references: [id])
 
-  @@unique([userId, businessLine])
+  @@unique([userId, businessLineId])
   @@map("commercial_conditions")
 }
 
@@ -152,11 +159,11 @@ model TeamTemplateMember {
 }
 
 model Quote {
-  id                 String       @id @default(uuid())
-  code               String       @unique
+  id                 String      @id @default(uuid())
+  code               String      @unique
   clientId           String
   createdBy          String
-  businessLine       BusinessLine
+  businessLineId     String
   durationMonths     Float
   sellerContractType ContractType
   leadSource         LeadSource
@@ -191,9 +198,10 @@ model Quote {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  client      Client            @relation(fields: [clientId], references: [id])
-  creator     User              @relation(fields: [createdBy], references: [id])
-  teamMembers QuoteTeamMember[]
+  client       Client            @relation(fields: [clientId], references: [id])
+  creator      User              @relation(fields: [createdBy], references: [id])
+  businessLine BusinessLine      @relation(fields: [businessLineId], references: [id])
+  teamMembers  QuoteTeamMember[]
 
   @@map("quotes")
 }

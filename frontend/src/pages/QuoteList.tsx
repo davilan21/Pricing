@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { PlusCircle, Search } from 'lucide-react';
 import api from '../lib/api';
 import type { Quote, QuoteStatus } from '../types';
-import { formatUSD, STATUS_LABELS, STATUS_COLORS, BUSINESS_LINE_LABELS } from '../lib/utils';
+import { formatUSD, STATUS_LABELS, STATUS_COLORS } from '../lib/utils';
 
 export default function QuoteList() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -98,7 +98,7 @@ export default function QuoteList() {
                       <Link to={`/quotes/${q.id}`} className="text-primary font-medium hover:underline">{q.code}</Link>
                     </td>
                     <td className="px-5 py-3">{q.client?.name || '-'}</td>
-                    <td className="px-5 py-3 hidden sm:table-cell">{BUSINESS_LINE_LABELS[q.businessLine]}</td>
+                    <td className="px-5 py-3 hidden sm:table-cell">{q.businessLine?.name || 'N/A'}</td>
                     <td className="px-5 py-3 font-medium">{formatUSD(q.grossMarginPriceUsd || 0)}</td>
                     <td className="px-5 py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[q.status]}`}>
